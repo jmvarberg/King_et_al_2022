@@ -1,0 +1,692 @@
+---
+title: "King_et_al_2022_revisions"
+author: "JM Varberg"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+format:
+    html:
+        toc: true
+        toc-depth: 4
+        toc-location: left
+        link-external-icon: true
+        link-external-newwindo: true
+        code-fold: true
+        code-overflow: scroll
+        code-tools: true
+        highlight-style: github
+        code-copy: hover
+        code-link: true
+        theme:
+            light: flatly
+            dark: darkly
+        comments:
+            hypothesis: 
+                theme: clean
+        execute:
+            echo: true
+            output: true
+            error: false
+            message: false
+            warning: false
+        fig-width: 8
+        fig-height: 8
+        self-contained: true
+---
+
+## Load required packages
+
+```{r}
+library(tidyverse)
+library(cowplot)
+library(ggpubr)
+library(ggforce)
+library(data.table)
+xfun::pkg_load2(c('htmltools', 'mime'))
+```
+
+```{r Custom Functions}
+
+process <- function(df) {
+    
+    data <- df |>
+        mutate(Time = case_when(str_detect(Image, "frame_1") ~ "Pre",
+                                str_detect(Image, "frame_2") ~ "Anaphase",
+                                str_detect(Image, "frame_3") ~ "Post"),
+               Time = factor(Time, levels=c("Pre", "Anaphase", "Post")),
+               NE_Nuc_ratio = ((NE1_int + NE2_int)/2) / Nuc_int)
+    return(data)
+}
+
+plots_sina <- function(df, label_n){
+    df |>
+        filter(Time != "Post") |> 
+        ggplot(aes(x=Time, y=Nuc_Ratio)) +
+        geom_sina(alpha=0.4, size=1.5) +
+        stat_summary(geom="pointrange", fun.data=mean_sd, position="dodge") +
+        stat_compare_means(label.x = 2, label.y = 0.1) +
+        stat_compare_means(label = "p.signif") +
+        annotate("text", x=0.75, y=0.1, label = label_n) +
+        xlab("Time") +
+        ylab("Nuc/NE Ratio (a.u.)") +
+        theme_cowplot()
+}
+
+jmv_dataTable <- function(df) {
+    df |>
+        DT::datatable(extensions = 'Buttons', options = list(
+        scrollY="true",
+        scrollX="true",
+        pageLength = 10,
+        lengthMenu = c(10, 25, 50, 100), 
+        dom = 'Blfrtip',
+        buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+      )
+    )
+}
+
+#apply min-max normalization
+min_max_norm <- function(x, ...) {
+    return((x - min(x, ...))/(max(x, ...) - min(x, ...)))
+}
+
+plots_traces <- function(df, hline) {
+    df |> 
+        ggplot(aes(x=X, y=Y, group=Image)) +
+        geom_line(alpha=0.1) +
+        stat_summary(aes(group=Time.point), fun=mean, geom="line", colour="black", size = 1) +
+        geom_hline(yintercept = hline, color="red", linetype="dashed", size = 1) +
+        facet_wrap(~Time.point) +
+        xlab("Distance (microns)") +
+        ylab("GFP-Intensity (a.u.)") +
+        theme_cowplot()
+}
+
+```
+
+## Mitosis Line Scans
+
+Goal is to look at detachment during anaphase of mitotic divisions to compare to meiosis data. However, the histone marker does not work well for mitosis because it is excluded from the nucleolar region, so the masking approach used for meiosis images isn't working.
+
+Approach is to use line profiles across the nucleus, put through python tools for peak calling and for calculation of the Nuc/NE ratio. Essentially, NE peaks are called or manually defined (if needed when more than two peaks are detected), and the NE intensity is calculated as the average of the two NE peak intensities. The nucleoplasmic intensity is calculated as the average intensity of the middle 50% of the region between the two NE peaks.
+
+Images of the middle slices of nuclei were prepared by Grant, used for line profiles peformed by JMV in Fiji. A line width of 5 pixels and length of 5 microns was used, saving out CSV files for the X/Y coordinates of the resulting profile. These are read into the python workflow as input. Python notebook outputs a CSV for each image with the intensities and ratios calculated for each trace.
+
+
+```{r}
+#| fig-height: 5
+
+#read in data for line profiles
+nup2_mitosis <- fread("./data/NucRatios_Nup2-GFP_mitosis.csv")
+pom34_mitosis <- fread("./data/NucRatios_Pom34-GFP_mitosis.csv")
+nup60_mitosis <- fread("./data/NucRatios_Nup60-GFP_mitosis.csv")
+nup1_mitosis <- fread("./data/NucRatios_Nup1-GFP_mitosis.csv")
+mlp1_mitosis <- fread("./data/NucRatios_Mlp1-GFP_mitosis.csv")
+
+nup2_mitosis_df <- process(nup2_mitosis)
+nup2_mitosis_df$ID <- c("Nup2")
+pom34_mitosis_df <- process(pom34_mitosis)
+pom34_mitosis_df$ID <- c("Pom34")
+nup60_mitosis_df <- process(nup60_mitosis)
+nup60_mitosis_df$ID <- c("Nup60")
+nup1_mitosis_df <- process(nup1_mitosis)
+nup1_mitosis_df$ID <- c("Nup1")
+mlp1_mitosis_df <- process(mlp1_mitosis)
+mlp1_mitosis_df$ID <- c("Mlp1")
+
+#my_comparisons <- list(c("Pre", "Anaphase"), c("Anaphase", "Post"), c("Pre", "Post"))
+
+p1 <- nup2_mitosis_df |> 
+    filter(Time != "Post") |> 
+    plots_sina(label_n = "n = 32") + 
+    ylim(0,0.75) +
+    ggtitle("Nup2-GFP, mitosis linescans")
+ggsave2(plot = p1, "./plots/Nup2-GFP_mitosis_NucNE_Ratios.png")
+
+p2 <- pom34_mitosis_df |> 
+    filter(Time != "Post") |> 
+    plots_sina(label_n = "n = 22") +
+    ylim(0,0.75) +
+    ggtitle("Pom34-GFP, mitosis line scans")
+ggsave2(plot=p2, "./plots/Pom34-GFP_mitosis_NucNE_Ratios.png")
+
+p3 <- nup60_mitosis_df |> 
+    filter(Time != "Post") |> 
+    plots_sina(label_n = "n = 34") +
+    ylim(0,0.75) +
+    ggtitle("Nup60-GFP, mitosis line scans")
+ggsave2(plot=p3, "./plots/Nup60-GFP_mitosis_NucNE_Ratios.png")
+
+p4 <- nup1_mitosis_df |> 
+    filter(Time != "Post") |> 
+    plots_sina(label_n = "n = 42") +
+    ylim(0,0.75) +
+    ggtitle("Nup1-GFP, mitosis line scans")
+ggsave2(plot=p4, "./plots/Nup1-GFP_mitosis_NucNE_Ratios.png")
+
+p5 <- mlp1_mitosis_df |> 
+    filter(Time != "Post") |> 
+    plots_sina(label_n = "n = 16") +
+    ylim(0, 0.75) +
+    ggtitle("Mlp1-GFP, mitosis line scans")
+ggsave2(plot=p5, "./plots/Mlp1-GFP_mitosis_NucNE_Ratios.png")
+```
+
+```{r}
+#| fig-width: 12
+#| fig-height: 12
+p <- plot_grid(p1, p2, p3, p4, p5, ncol=2, nrow=3)
+p
+ggsave2("./plots/Combined_Nups_mitosis_Nuc_NE_ratios_plots.png", width=10, height=10, dpi=300)
+
+#combine for summary stats and statistical tests
+comb <- rbind(nup2_mitosis_df, pom34_mitosis_df, nup60_mitosis_df, nup1_mitosis_df, mlp1_mitosis_df)
+
+```
+
+#### Summary Stats for Mitosis Linescans
+```{r}
+comb |> 
+    group_by(ID, Time) |> 
+    get_summary_stats(type="common") |> 
+    jmv_dataTable()
+```
+
+#### Wilcoxon Test Results, Mitosis
+```{r}
+comb |> 
+    filter(Time != "Post") |> 
+    group_by(ID) |> 
+    rstatix::wilcox_test(Nuc_Ratio ~ Time) |> 
+    jmv_dataTable()
+
+```
+
+### Mitosis line scan plots
+
+Alternative way of plotting the data, instead of showing the ratios as bar/sina plots, show the individual profiles along with the averaged profile for each group. This is similar to the pombe figures in Fig. 10.
+
+```{r}
+#| fig-height: 5
+pom34_profile_files <- list.files("./Middle_slices_Pom34_mitosis/line_profiles/Plot_ProfileCSVs/", pattern = ".csv", full.names = TRUE)
+pom34_profiles <- lapply(pom34_profile_files, fread)
+names(pom34_profiles) <- pom34_profile_files
+
+
+pom34_profiles <- lapply(pom34_profiles, function(df) { df <- df |> mutate(Y = min_max_norm(Y, na.rm=TRUE))})
+
+pom34_trace_df <- bind_rows(pom34_profiles, .id = "Image") |> 
+    select(-V1) |> 
+    mutate(Time.point = case_when(str_detect(Image, "frame_1") ~ "Pre",
+                                  str_detect(Image, "frame_2") ~ "Anaphase",
+                                  str_detect(Image, "frame_3") ~ "Post"),
+           Time.point = factor(Time.point, levels=c("Pre", "Anaphase", "Post")))
+
+
+p1 <- pom34_trace_df |> 
+    filter(Time.point != "Post") |> 
+    plots_traces(hline=0.25) +
+    ggtitle("Pom34-GFP mitosis line scans")
+p1
+
+###Nup2
+
+nup2_profile_files <- list.files("./Middle_slices_Nup2_mitosis/line_profiles/Plot_ProfileCSVs/", pattern = ".csv", full.names = TRUE)
+nup2_profiles <- lapply(nup2_profile_files, fread)
+names(nup2_profiles) <- nup2_profile_files
+nup2_profiles <- lapply(nup2_profiles, function(df) { df <- df |> mutate(Y = min_max_norm(Y, na.rm=TRUE))})
+nup2_trace_df <- bind_rows(nup2_profiles, .id = "Image") |> 
+    select(-V1) |> 
+    mutate(Time.point = case_when(str_detect(Image, "frame_1") ~ "Pre",
+                                  str_detect(Image, "frame_2") ~ "Anaphase",
+                                  str_detect(Image, "frame_3") ~ "Post"),
+           Time.point = factor(Time.point, levels=c("Pre", "Anaphase", "Post")))
+
+p2 <- nup2_trace_df |> 
+    filter(Time.point != "Post") |> 
+    plots_traces(hline=0.25) + 
+    ggtitle("Nup2-GFP, mitosis line scans")
+p2 
+
+###Nup60
+
+nup60_profile_files <- list.files("./Middle_slices_Nup60_mitosis/line_profiles/Plot_ProfileCSVs/", pattern = ".csv", full.names = TRUE)
+nup60_profiles <- lapply(nup60_profile_files, fread)
+names(nup60_profiles) <- nup60_profile_files
+nup60_profiles <- lapply(nup60_profiles, function(df) { df <- df |> mutate(Y = min_max_norm(Y, na.rm=TRUE))})
+nup60_trace_df <- bind_rows(nup60_profiles, .id = "Image") |> 
+    select(-V1) |> 
+    mutate(Time.point = case_when(str_detect(Image, "frame_1") ~ "Pre",
+                                  str_detect(Image, "frame_2") ~ "Anaphase",
+                                  str_detect(Image, "frame_3") ~ "Post"),
+           Time.point = factor(Time.point, levels=c("Pre", "Anaphase", "Post")))
+
+p3 <- nup60_trace_df |> 
+    filter(Time.point != "Post") |> 
+    plots_traces(hline=0.25) + 
+    ggtitle("Nup60-GFP, mitosis line scans")
+p3 
+
+###Nup1
+
+nup1_profile_files <- list.files("./Middle_slices_Nup1_mitosis/line_profiles/Plot_ProfileCSVs/", pattern = ".csv", full.names = TRUE)
+nup1_profiles <- lapply(nup1_profile_files, fread)
+names(nup1_profiles) <- nup1_profile_files
+nup1_profiles <- lapply(nup1_profiles, function(df) { df <- df |> mutate(Y = min_max_norm(Y, na.rm=TRUE))})
+nup1_trace_df <- bind_rows(nup1_profiles, .id = "Image") |> 
+    select(-V1) |> 
+    mutate(Time.point = case_when(str_detect(Image, "frame_1") ~ "Pre",
+                                  str_detect(Image, "frame_2") ~ "Anaphase",
+                                  str_detect(Image, "frame_3") ~ "Post"),
+           Time.point = factor(Time.point, levels=c("Pre", "Anaphase", "Post")))
+
+p4 <- nup1_trace_df |> 
+    filter(Time.point != "Post") |> 
+    plots_traces(hline=0.25) + 
+    ggtitle("Nup1-GFP, mitosis line scans")
+p4
+
+###Mlp1
+
+mlp1_profile_files <- list.files("./Middle_slices_Mlp1_mitosis/line_profiles/Plot_ProfileCSVs/", pattern = ".csv", full.names = TRUE)
+mlp1_profiles <- lapply(mlp1_profile_files, fread)
+names(mlp1_profiles) <- mlp1_profile_files
+mlp1_profiles <- lapply(mlp1_profiles, function(df) { df <- df |> mutate(Y = min_max_norm(Y, na.rm=TRUE))})
+mlp1_trace_df <- bind_rows(mlp1_profiles, .id = "Image") |> 
+    select(-V1) |> 
+    mutate(Time.point = case_when(str_detect(Image, "frame_1") ~ "Pre",
+                                  str_detect(Image, "frame_2") ~ "Anaphase",
+                                  str_detect(Image, "frame_3") ~ "Post"),
+           Time.point = factor(Time.point, levels=c("Pre", "Anaphase", "Post")))
+
+p5 <- mlp1_trace_df |> 
+    filter(Time.point != "Post") |> 
+    plots_traces(hline=0.25) + 
+    ggtitle("Mlp1-GFP, mitosis line scans")
+p5
+
+```
+
+
+```{r}
+plot_grid(p1, p2, p3, p4, p5, ncol=2, nrow=3)
+ggsave2("./plots/Combined_Nups_mitosis_plot_profiles_fig10_style.png")
+```
+
+## Meiosis Line Scans
+
+Since we'd like to make a comment on the relative amount of detachment between meiosis vs. mitosis, we want to compare ratios derived using the same analysis method. To do this, we will re-analyze the meiosis images using the line scan approach so we can directly compare to line scan values from mitotic data.
+
+```{r}
+pom34_meiosis <- fread("./data/NucRatios_Pom34-GFP_meiosis.csv")
+nup2_meiosis <- fread("./data/NucRatios_Nup2-GFP_meiosis.csv")
+nup1_meiosis <- fread("./data/NucRatios_Nup1-GFP_meiosis.csv")
+nup60_meiosis <- fread("./data/NucRatios_Nup60-GFP_meiosis.csv")
+mlp1_meiosis <- fread("./data/NucRatios_Mlp1-GFP_meiosis.csv")
+
+pom34_meiosis_df <- process(pom34_meiosis)
+pom34_meiosis_df$ID <- c("Pom34")
+nup2_meiosis_df <- process(nup2_meiosis)
+nup2_meiosis_df$ID <- c("Nup2")
+nup1_meiosis_df <- process(nup1_meiosis)
+nup1_meiosis_df$ID <- c("Nup1")
+nup60_meiosis_df <- process(nup60_meiosis)
+nup60_meiosis_df$ID <- c("Nup60")
+mlp1_meiosis_df <- process(mlp1_meiosis)
+mlp1_meiosis_df$ID <- c("Mlp1")
+```
+
+#### Meiosis Summary Stats
+
+```{r}
+combdf <- rbind(pom34_meiosis_df, nup2_meiosis_df, nup1_meiosis_df, nup60_meiosis_df, mlp1_meiosis_df)
+
+combdf |> 
+    group_by(Time, ID) |> 
+    get_summary_stats() |> 
+    jmv_dataTable()
+```
+### Meiosis line scan plots
+
+```{r}
+p <- pom34_meiosis_df |> 
+    filter(Time != "Post") |> 
+    plots_sina(label_n = "n = 54") + 
+    ylim(0, 1.5) + 
+    ggtitle("Pom34-GFP, meiosis linescans") 
+p
+ggsave2(plot=p, "./plots/Pom34-GFP_meiosis_NucNE_Ratios.png")
+```
+
+```{r}
+
+p2 <- nup2_meiosis_df |> 
+    filter(Time != "Post") |> 
+    plots_sina(label_n = "n = 56") +
+    ylim(0, 1.5) + 
+    ggtitle("Nup2-GFP, meiosis line scans")
+p2 
+ggsave2(plot=p2, "./plots/Nup2-GFP_meiosis_NucNE_Ratios.png")
+
+```
+
+```{r}
+
+p3 <- nup1_meiosis_df |> 
+    filter(Time != "Post") |> 
+    plots_sina(label_n = "n = 26") +
+    ylim(0, 1.5) + 
+    ggtitle("Nup1-GFP, meiosis line scans")
+p3 
+ggsave2(plot=p3, "./plots/Nup1-GFP_meiosis_NucNE_Ratios.png")
+
+```
+
+
+```{r}
+
+p4 <- nup60_meiosis_df |> 
+    filter(Time != "Post") |> 
+    plots_sina(label_n = "n = 30") +
+    ylim(0, 1.5) + 
+    ggtitle("Nup60-GFP, meiosis line scans")
+p4 
+ggsave2(plot=p4, "./plots/Nup60-GFP_meiosis_NucNE_Ratios.png")
+
+```
+
+```{r}
+
+p5 <- mlp1_meiosis_df |> 
+    filter(Time != "Post") |> 
+    plots_sina(label_n = "n = 23") +
+    ylim(0, 1.5) + 
+    ggtitle("Mlp1-GFP, meiosis line scans")
+p5 
+ggsave2(plot=p5, "./plots/Mlp1-GFP_meiosis_NucNE_Ratios.png")
+
+```
+
+```{r}
+#| fig-width: 10
+#| fig-height: 10
+plot_grid(p, p2, p3, p4, p5, ncol=2, nrow=3)
+
+```
+
+### Meiosis line scan plots
+
+```{r}
+#| fig-height: 5
+
+#pom34 meiosis line traces
+pom34_profile_files <- list.files("./Middle_slices_Pom34_meosis/line_profiles/Plot_ProfileCSVs/", pattern = ".csv", full.names = TRUE)
+pom34_profiles <- lapply(pom34_profile_files, fread)
+names(pom34_profiles) <- pom34_profile_files
+
+pom34_profiles <- lapply(pom34_profiles, function(df) { df <- df |> mutate(Y = min_max_norm(Y, na.rm=TRUE))})
+
+pom34_trace_df <- bind_rows(pom34_profiles, .id = "Image") |> 
+    select(-V1) |> 
+    mutate(Time.point = case_when(str_detect(Image, "frame_1") ~ "Pre",
+                                  str_detect(Image, "frame_2") ~ "Anaphase",
+                                  str_detect(Image, "frame_3") ~ "Post"),
+           Time.point = factor(Time.point, levels=c("Pre", "Anaphase", "Post")))
+
+p1 <- pom34_trace_df |> 
+    filter(Time.point != "Post") |> 
+    plots_traces(hline=0.20) + 
+    ggtitle("Pom34-GFP, meiosis")
+p1 
+ggsave2("./plots/Pom34-GFP_meiosis_line_traces.png", width=7, height=5, units="in", dpi=300)
+
+```
+
+```{r}
+#| fig-height: 5
+
+#nup2 meiosis line traces
+Nup2_profile_files <- list.files("./Middle_slices_Nup2_meiosis/line_profiles/Plot_ProfileCSVs/", pattern = ".csv", full.names = TRUE)
+Nup2_profiles <- lapply(Nup2_profile_files, fread)
+names(Nup2_profiles) <- Nup2_profile_files
+
+Nup2_profiles <- lapply(Nup2_profiles, function(df) { df <- df |> mutate(Y = min_max_norm(Y, na.rm=TRUE))})
+
+Nup2_trace_df <- bind_rows(Nup2_profiles, .id = "Image") |> 
+    select(-V1) |> 
+    mutate(Time.point = case_when(str_detect(Image, "frame_1") ~ "Pre",
+                                  str_detect(Image, "frame_2") ~ "Anaphase",
+                                  str_detect(Image, "frame_3") ~ "Post"),
+           Time.point = factor(Time.point, levels=c("Pre", "Anaphase", "Post")))
+
+p2 <- Nup2_trace_df |> 
+    filter(Time.point != "Post") |> 
+    plots_traces(hline=0.20) + 
+    ggtitle("Nup2-GFP, meiosis")
+p2 
+```
+
+```{r}
+#| fig-height: 5
+
+#nup1 meiosis line traces
+Nup1_profile_files <- list.files("./Middle_slices_Nup1_meiosis/line_profiles/Plot_ProfileCSVs/", pattern = ".csv", full.names = TRUE)
+Nup1_profiles <- lapply(Nup1_profile_files, fread)
+names(Nup1_profiles) <- Nup1_profile_files
+
+Nup1_profiles <- lapply(Nup1_profiles, function(df) { df <- df |> mutate(Y = min_max_norm(Y, na.rm=TRUE))})
+
+Nup1_trace_df <- bind_rows(Nup1_profiles, .id = "Image") |> 
+    select(-V1) |> 
+    mutate(Time.point = case_when(str_detect(Image, "frame_1") ~ "Pre",
+                                  str_detect(Image, "frame_2") ~ "Anaphase",
+                                  str_detect(Image, "frame_3") ~ "Post"),
+           Time.point = factor(Time.point, levels=c("Pre", "Anaphase", "Post")))
+
+p3 <- Nup1_trace_df |> 
+    filter(Time.point != "Post") |> 
+    plots_traces(hline=0.20) + 
+    ggtitle("Nup1-GFP, meiosis")
+p3 
+```
+
+```{r}
+#| fig-height: 5
+
+#nup60 meiosis line traces
+Nup60_profile_files <- list.files("./Middle_slices_Nup60_meiosis/line_profiles/Plot_ProfileCSVs/", pattern = ".csv", full.names = TRUE)
+Nup60_profiles <- lapply(Nup60_profile_files, fread)
+names(Nup60_profiles) <- Nup60_profile_files
+
+Nup60_profiles <- lapply(Nup60_profiles, function(df) { df <- df |> mutate(Y = min_max_norm(Y, na.rm=TRUE))})
+
+Nup60_trace_df <- bind_rows(Nup60_profiles, .id = "Image") |> 
+    select(-V1) |> 
+    mutate(Time.point = case_when(str_detect(Image, "frame_1") ~ "Pre",
+                                  str_detect(Image, "frame_2") ~ "Anaphase",
+                                  str_detect(Image, "frame_3") ~ "Post"),
+           Time.point = factor(Time.point, levels=c("Pre", "Anaphase", "Post")))
+
+p4 <- Nup60_trace_df |> 
+    filter(Time.point != "Post") |> 
+    plots_traces(hline=0.20) + 
+    ggtitle("Nup60-GFP, meiosis")
+p4 
+```
+
+```{r}
+#| fig-height: 5
+
+#mlp1 meiosis line traces
+Mlp1_profile_files <- list.files("./Middle_slices_Mlp1_meiosis/line_profiles/Plot_ProfileCSVs/", pattern = ".csv", full.names = TRUE)
+Mlp1_profiles <- lapply(Mlp1_profile_files, fread)
+names(Mlp1_profiles) <- Mlp1_profile_files
+
+Mlp1_profiles <- lapply(Mlp1_profiles, function(df) { df <- df |> mutate(Y = min_max_norm(Y, na.rm=TRUE))})
+
+Mlp1_trace_df <- bind_rows(Mlp1_profiles, .id = "Image") |> 
+    select(-V1) |> 
+    mutate(Time.point = case_when(str_detect(Image, "frame_1") ~ "Pre",
+                                  str_detect(Image, "frame_2") ~ "Anaphase",
+                                  str_detect(Image, "frame_3") ~ "Post"),
+           Time.point = factor(Time.point, levels=c("Pre", "Anaphase", "Post")))
+
+p5 <- Mlp1_trace_df |> 
+    filter(Time.point != "Post") |> 
+    plots_traces(hline=0.20) + 
+    ggtitle("Mlp1-GFP, meiosis")
+p5 
+```
+
+```{r}
+plot_grid(p1, p2, p3, p4, p5, ncol=2, nrow=3)
+ggsave2("./plots/Combined_meiosis_line_traces.png", width=10, height=10, units="in", dpi=300)
+
+```
+
+## Final figure
+
+Want to make a final version of the figure comparing Pom34, Nup1, Nup60, Nup2, Mlp1 Pre vs. Anaphase based on line scan ratios for mitosis and meiosis. Normalize each Nup to its own "Pre" mean ratio. Plot should be styled similarly to Fig 1C from bioRxiv submission.
+
+```{r}
+#| fig-width: 4
+#| fig-height: 8
+#combined mitosis df
+comb_mitosis <- comb |> mutate(Experiment = "Mitosis")
+
+#combined meiosis df
+comb_meiosis <- combdf |> mutate(Experiment = "Meiosis")
+
+#join them together
+full_df <- bind_rows(comb_mitosis, comb_meiosis)
+
+#calculate mean values for pre for each nup
+
+full_df_pre_means <- full_df |> 
+    filter(Time == "Pre") %>% 
+    group_by(Experiment, ID, Time) |> 
+    summarise_at(vars(Nuc_Ratio), mean) |> 
+    rename(PreAvg = Nuc_Ratio) |> 
+    select(-Time)
+
+#left join in the pre value for each nup and normalize with mutate
+
+full_df_norm <- left_join(full_df, full_df_pre_means)
+
+full_df_norm <- full_df_norm |> 
+    mutate(Norm.Nuc.Ratio = Nuc_Ratio/PreAvg,
+           ID = factor(ID, levels=c("Pom34", "Mlp1", "Nup1", "Nup2", "Nup60")),
+           Experiment = factor(Experiment, levels = c("Mitosis", "Meiosis")))
+
+#plot
+
+full_df_norm |> 
+    filter(Time != "Post") |>
+    ggplot(aes(x=forcats::fct_rev(ID), y=Norm.Nuc.Ratio, color=Experiment)) +
+    #geom_hline(yintercept = 1) +
+    geom_sina(alpha=0.3, size=1, pch=16) +
+    stat_summary(geom="pointrange", fun.data=mean_sd, position=position_dodge(width=0.9)) +
+    #stat_compare_means(label="p.signif", ref.group="Pom34") +
+    xlab("Normalized detachment index (a.u.)") +
+    ylab("") +
+    #scale_color_brewer(palette = "Paired") +
+    scale_color_manual(values = c("darkslategrey", "darkslateblue")) +
+    facet_wrap(~Experiment+Time, ncol=2) +
+    theme_cowplot() +
+    coord_flip() +
+    theme(legend.position = "bottom") +
+    theme(strip.text.x = element_text(size = 12, color = "black", face = "bold"),
+          strip.background = NULL)
+          
+ggsave2("./plots/Combined_Meiosis_Mitosis_Linescan_Ratios_color_3_legend.pdf", width=4, height=4.8, units="in")
+xfun::embed_file("./plots/Combined_Meiosis_Mitosis_Linescan_Ratios_color_3_legend.pdf")
+```
+
+## Stats tests vs. Pom34 for linescans
+
+These are the stats that are reported for Figure S2F in Table S5.
+
+### Summary Stats, Nuc Ratios
+
+```{r}
+full_df_norm |> 
+    filter(Time != "Post") |> 
+    group_by(Experiment, ID, Time) |> 
+    rstatix::get_summary_stats(Norm.Nuc.Ratio, type="common") |> 
+    jmv_dataTable()
+```
+
+### Shapiro Test
+
+```{r}
+full_df_norm |> 
+    filter(Time != "Post") |> 
+    group_by(Experiment, ID, Time) |> 
+    rstatix::shapiro_test(Norm.Nuc.Ratio) |> 
+    jmv_dataTable()
+```
+
+### Kruskal-Wallis (Non-parametric ANOVA)
+
+```{r}
+full_df_norm |> 
+    filter(Time != "Post") |> 
+    group_by(Experiment, Time) |>
+    rstatix::kruskal_test(Norm.Nuc.Ratio ~ ID) |> 
+    jmv_dataTable()
+
+```
+
+### Dunns Post-hoc Test vs. Pom34
+
+```{r}
+#Dunn's post-hoc pairwise multiple comparisons
+dunn <- full_df_norm %>% 
+  group_by(Experiment, Time) %>% 
+  rstatix::dunn_test(Norm.Nuc.Ratio ~ ID, p.adjust.method = "holm")
+
+#'The dunn_test function performs all pair-wise comparisons, and so the adjusted p.value uses all tests for this correction. 
+#'Since we only want to ask if any are different than Pom34-GFP, we subset those comparisons, 
+#'then re-calculate adjusted p-values using the number of tests actually done.
+
+dunn |> 
+    filter(grepl("Pom34", group1), Time != "Post") |> 
+    group_by(Experiment, Time) |>  
+    mutate(Corr.p.adjust = p.adjust(p, method="holm"),
+           Corr.p.signif = case_when(Corr.p.adjust <= 0.0001 ~ "****",
+                                     Corr.p.adjust <= 0.001 ~ "***",
+                                     Corr.p.adjust <= 0.01 ~ "**",
+                                     Corr.p.adjust <= 0.05 ~ "*",
+                                     TRUE ~ "ns")) |> 
+    select(-p.adj, -p.adj.signif) |> 
+    jmv_dataTable()
+
+```
+
+## CSV files from Python Notebooks
+
+These embedded CSVs are the output generated by the Python notebook for peak calling and intensity measurements from line scans.
+
+#### Mitosis Line Scan Outputs
+
+```{r}
+
+
+xfun::embed_file("./data/NucRatios_Mlp1-GFP_mitosis.csv")
+xfun::embed_file("./data/NucRatios_Nup1-GFP_mitosis.csv")
+xfun::embed_file("./data/NucRatios_Nup2-GFP_mitosis.csv")
+xfun::embed_file("./data/NucRatios_Pom34-GFP_mitosis.csv")
+xfun::embed_file("./data/NucRatios_Nup60-GFP_mitosis.csv")
+
+```
+
+#### Meiosis Line Scan Outputs
+
+```{r}
+xfun::embed_file("./data/NucRatios_Nup2-GFP_meiosis.csv")
+xfun::embed_file("./data/NucRatios_Pom34-GFP_meiosis.csv")
+xfun::embed_file("./data/NucRatios_Nup1-GFP_meiosis.csv")
+xfun::embed_file("./data/NucRatios_Nup60-GFP_meiosis.csv")
+xfun::embed_file("./data/NucRatios_Mlp1-GFP_meiosis.csv")
+```
+
+
+

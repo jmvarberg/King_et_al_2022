@@ -1,0 +1,9 @@
+"","Time.point","Group","Treatment","variable","statistic","p"
+"1","Pre","pCUP-Cdc5[KD]","Control","Cdc5KDctrlpre.Norm.Nuc.NE.Ratio",0.984959426649719,0.148214836846558
+"2","Post","pCUP-Cdc5[KD]","Control","Cdc5KDctrlpre.Norm.Nuc.NE.Ratio",0.95517809148418,0.000228335148498378
+"3","Pre","pCUP-Cdc5[KD]","CuSO4","Cdc5KDctrlpre.Norm.Nuc.NE.Ratio",0.980039616414396,0.0247541593013466
+"4","Post","pCUP-Cdc5[KD]","CuSO4","Cdc5KDctrlpre.Norm.Nuc.NE.Ratio",0.98875157083728,0.253922915228514
+"5","Pre","pCUP-Cdc5[WT]","Control","Cdc5KDctrlpre.Norm.Nuc.NE.Ratio",0.930168564912364,7.65275524673917e-07
+"6","Post","pCUP-Cdc5[WT]","Control","Cdc5KDctrlpre.Norm.Nuc.NE.Ratio",0.981890379022953,0.0406418380216579
+"7","Pre","pCUP-Cdc5[WT]","CuSO4","Cdc5KDctrlpre.Norm.Nuc.NE.Ratio",0.99393177764694,0.87698062918156
+"8","Post","pCUP-Cdc5[WT]","CuSO4","Cdc5KDctrlpre.Norm.Nuc.NE.Ratio",0.973656777033983,0.016438755158341

@@ -1,0 +1,9 @@
+"","Sample","Group","variable","statistic","p"
+"1","pCUP-Cdc5[KD]","Pre.Control","Norm.Nuc.NE.mean.Ratio",0.976619159345136,0.038665210690771
+"2","pCUP-Cdc5[WT]","Pre.Control","Norm.Nuc.NE.mean.Ratio",0.925237945562668,5.87727008226237e-07
+"3","pCUP-Cdc5[KD]","Post.Control","Norm.Nuc.NE.mean.Ratio",0.977377711238302,0.0452659030866801
+"4","pCUP-Cdc5[WT]","Post.Control","Norm.Nuc.NE.mean.Ratio",0.941842863447143,8.89610899833268e-06
+"5","pCUP-Cdc5[KD]","Pre.CuSO4","Norm.Nuc.NE.mean.Ratio",0.975916926584999,0.0238130905797237
+"6","pCUP-Cdc5[WT]","Pre.CuSO4","Norm.Nuc.NE.mean.Ratio",0.966623044837786,0.00273495918552499
+"7","pCUP-Cdc5[KD]","Post.CuSO4","Norm.Nuc.NE.mean.Ratio",0.97391783789441,0.015393635264858
+"8","pCUP-Cdc5[WT]","Post.CuSO4","Norm.Nuc.NE.mean.Ratio",0.960813580698359,0.000847570846745868

@@ -1,0 +1,7 @@
+"","Sample",".y.","group1","group2","n1","n2","statistic","p","p.adj","p.adj.signif"
+"1","Nup60-GFP_WT","WTpre.Norm.Nuc.NE.Ratio","-45 min","-10 min",35,35,210,0.087,0.087,"ns"
+"2","Nup60-GFP_WT","WTpre.Norm.Nuc.NE.Ratio","-10 min","Anaphase I",35,35,0,5.82e-11,1.75e-10,"****"
+"3","Nup60-GFP_WT","WTpre.Norm.Nuc.NE.Ratio","Anaphase I","+10 min",35,35,612,1.47e-08,2.94e-08,"****"
+"4","Nup60-GFP_delta2-47","WTpre.Norm.Nuc.NE.Ratio","-45 min","-10 min",31,31,6,1.3e-08,2.6e-08,"****"
+"5","Nup60-GFP_delta2-47","WTpre.Norm.Nuc.NE.Ratio","-10 min","Anaphase I",31,31,0,9.31e-10,2.79e-09,"****"
+"6","Nup60-GFP_delta2-47","WTpre.Norm.Nuc.NE.Ratio","Anaphase I","+10 min",31,31,417,0.000541,0.000541,"***"

@@ -1,0 +1,5 @@
+﻿File,Group,Treatment
+210501_29071_CuSO4_measurements.csv,pCUP-Cdc5[WT],CuSO4
+210501_29071_NA_measurements.csv,pCUP-Cdc5[WT],Control
+210501_29073_CuSO4_measurements.csv,pCUP-Cdc5[KD],CuSO4
+210501_29073_NA_measurements.csv,pCUP-Cdc5[KD],Control

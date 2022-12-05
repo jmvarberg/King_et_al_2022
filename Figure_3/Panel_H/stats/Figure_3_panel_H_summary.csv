@@ -1,0 +1,9 @@
+"","Sample","Group","variable","n","min","max","median","iqr","mean","sd","se","ci"
+"1","pCUP-Cdc5[KD]","Pre.Control","Norm.Nuc.NE.mean.Ratio",117,0.741,1.452,0.99,0.203,1,0.147,0.014,0.027
+"2","pCUP-Cdc5[WT]","Pre.Control","Norm.Nuc.NE.mean.Ratio",147,0.717,1.885,1.02,0.211,1.055,0.192,0.016,0.031
+"3","pCUP-Cdc5[KD]","Post.Control","Norm.Nuc.NE.mean.Ratio",117,0.643,1.552,0.968,0.241,0.985,0.17,0.016,0.031
+"4","pCUP-Cdc5[WT]","Post.Control","Norm.Nuc.NE.mean.Ratio",147,0.713,1.651,0.998,0.177,1.01,0.15,0.012,0.024
+"5","pCUP-Cdc5[KD]","Pre.CuSO4","Norm.Nuc.NE.mean.Ratio",126,0.697,1.502,0.995,0.232,1.005,0.172,0.015,0.03
+"6","pCUP-Cdc5[WT]","Pre.CuSO4","Norm.Nuc.NE.mean.Ratio",130,0.629,1.649,0.948,0.208,0.97,0.165,0.014,0.029
+"7","pCUP-Cdc5[KD]","Post.CuSO4","Norm.Nuc.NE.mean.Ratio",126,0.606,1.556,0.97,0.225,1.003,0.179,0.016,0.032
+"8","pCUP-Cdc5[WT]","Post.CuSO4","Norm.Nuc.NE.mean.Ratio",130,1.062,2.538,1.641,0.378,1.696,0.28,0.025,0.049

@@ -1,0 +1,5 @@
+"","Sample","Treatment",".y.","group1","group2","n1","n2","statistic","p"
+"1","pCUP-Cdc5[KD]","Control","Norm.Nuc.NE.mean.Ratio","Post","Pre",117,117,2935,0.16
+"2","pCUP-Cdc5[KD]","CuSO4","Norm.Nuc.NE.mean.Ratio","Post","Pre",126,126,4039,0.926
+"3","pCUP-Cdc5[WT]","Control","Norm.Nuc.NE.mean.Ratio","Post","Pre",147,147,3952,0.00405
+"4","pCUP-Cdc5[WT]","CuSO4","Norm.Nuc.NE.mean.Ratio","Post","Pre",130,130,8506,5.56e-23

@@ -1,0 +1,7 @@
+"","Sample","Time.point","variable","statistic","p"
+"1","Cdc5mn","Pre","Cdc5pre.Norm.Nuc.NE.Ratio",0.926733759594636,4.04491106202627e-06
+"2","Cdc20mn","Pre","Cdc5pre.Norm.Nuc.NE.Ratio",0.947955964104846,0.000117527124036749
+"3","Cdc20mn.Cdc5mn","Pre","Cdc5pre.Norm.Nuc.NE.Ratio",0.93744607672146,1.60318229960076e-05
+"4","Cdc5mn","Metaphase I","Cdc5pre.Norm.Nuc.NE.Ratio",0.979527047754736,0.0547956707624591
+"5","Cdc20mn","Metaphase I","Cdc5pre.Norm.Nuc.NE.Ratio",0.994672620830531,0.92469319706801
+"6","Cdc20mn.Cdc5mn","Metaphase I","Cdc5pre.Norm.Nuc.NE.Ratio",0.98264249069393,0.100950995956212

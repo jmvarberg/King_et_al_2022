@@ -1,0 +1,4 @@
+"","Time.point",".y.","n","statistic","df","p","method"
+"1","Pre","Norm.Nuc.NE.mean.Ratio",532,128.27517014105,5,5.53e-26,"Kruskal-Wallis"
+"2","Anaphase","Norm.Nuc.NE.mean.Ratio",532,252.760154280735,5,1.41e-52,"Kruskal-Wallis"
+"3","Post","Norm.Nuc.NE.mean.Ratio",532,54.2015204743918,5,1.91e-10,"Kruskal-Wallis"

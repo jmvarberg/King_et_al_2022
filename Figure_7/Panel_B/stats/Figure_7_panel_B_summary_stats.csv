@@ -1,0 +1,9 @@
+"","Time.point","Sample","variable","n","min","max","median","iqr","mean","sd","se","ci"
+"1","-45 min","Nup60-GFP_WT","WTpre.Norm.Nuc.NE.Ratio",35,0.695,1.223,1.011,0.161,1,0.132,0.022,0.045
+"2","-45 min","Nup60-GFP_delta2-47","WTpre.Norm.Nuc.NE.Ratio",31,1.096,1.842,1.478,0.282,1.479,0.205,0.037,0.075
+"3","-10 min","Nup60-GFP_WT","WTpre.Norm.Nuc.NE.Ratio",35,0.795,1.333,1.033,0.154,1.042,0.111,0.019,0.038
+"4","-10 min","Nup60-GFP_delta2-47","WTpre.Norm.Nuc.NE.Ratio",31,1.557,2.226,1.864,0.176,1.88,0.164,0.029,0.06
+"5","Anaphase I","Nup60-GFP_WT","WTpre.Norm.Nuc.NE.Ratio",35,1.644,2.491,2.13,0.32,2.064,0.23,0.039,0.079
+"6","Anaphase I","Nup60-GFP_delta2-47","WTpre.Norm.Nuc.NE.Ratio",31,2.414,3.347,2.918,0.354,2.881,0.25,0.045,0.092
+"7","+10 min","Nup60-GFP_WT","WTpre.Norm.Nuc.NE.Ratio",35,1.151,2.149,1.46,0.309,1.522,0.256,0.043,0.088
+"8","+10 min","Nup60-GFP_delta2-47","WTpre.Norm.Nuc.NE.Ratio",31,2.046,3.069,2.632,0.425,2.615,0.291,0.052,0.107

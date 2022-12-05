@@ -1,0 +1,13 @@
+"","Time.point","Sample","variable","statistic","p"
+"1","Pre","WT","Norm.Nuc.NE.mean.Ratio",0.953734265211328,3.9088715186107e-07
+"2","Pre","S89A","Norm.Nuc.NE.mean.Ratio",0.956138890478728,0.000243966220246581
+"3","Pre","Nterm3A","Norm.Nuc.NE.mean.Ratio",0.983248820082044,0.153782291613845
+"4","Pre","Nterm5A","Norm.Nuc.NE.mean.Ratio",0.961814249910869,0.000674583673696246
+"5","Pre","Cterm4A","Norm.Nuc.NE.mean.Ratio",0.943967626943713,3.27458915687512e-05
+"6","Pre","9A","Norm.Nuc.NE.mean.Ratio",0.983420276826399,0.00350085673523029
+"7","Post","WT","Norm.Nuc.NE.mean.Ratio",0.96921367220526,3.27108428198614e-05
+"8","Post","S89A","Norm.Nuc.NE.mean.Ratio",0.968660381209572,0.00317485303752631
+"9","Post","Nterm3A","Norm.Nuc.NE.mean.Ratio",0.869547779425204,9.96441952502559e-09
+"10","Post","Nterm5A","Norm.Nuc.NE.mean.Ratio",0.9379585826853,8.50947483671275e-06
+"11","Post","Cterm4A","Norm.Nuc.NE.mean.Ratio",0.972024590292525,0.007605058431829
+"12","Post","9A","Norm.Nuc.NE.mean.Ratio",0.964601292362388,3.96881481625595e-06

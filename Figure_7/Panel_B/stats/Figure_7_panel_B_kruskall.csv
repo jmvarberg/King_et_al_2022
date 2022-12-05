@@ -1,0 +1,3 @@
+"","Sample",".y.","n","statistic","df","p","method"
+"1","Nup60-GFP_WT","WTpre.Norm.Nuc.NE.Ratio",140,112.692748588797,3,2.89e-24,"Kruskal-Wallis"
+"2","Nup60-GFP_delta2-47","WTpre.Norm.Nuc.NE.Ratio",124,103.315804370447,3,3.01e-22,"Kruskal-Wallis"

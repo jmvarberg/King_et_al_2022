@@ -1,0 +1,4 @@
+"","Sample",".y.","group1","group2","n1","n2","statistic","p"
+"1","Cdc5mn","Cdc5pre.Norm.Nuc.NE.Ratio","Pre","Metaphase I",125,125,5018,0.00779
+"2","Cdc20mn","Cdc5pre.Norm.Nuc.NE.Ratio","Pre","Metaphase I",124,124,1784,1.86e-07
+"3","Cdc20mn.Cdc5mn","Cdc5pre.Norm.Nuc.NE.Ratio","Pre","Metaphase I",128,128,3989,0.742
